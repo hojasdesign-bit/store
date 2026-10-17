@@ -1,5 +1,6 @@
-// Seed local — idéntico a los datos demo que usa el fallback cuando Supabase
-// no está configurado o falla. NO inventar números distintos a este seed.
+// Seed local — IDÉNTICO a Supabase (proyecto filmalert, tablas store_*).
+// Es el fallback cuando Supabase no está configurado o falla.
+// NO inventar números distintos a este seed.
 // Stats derivadas: total = completadas + canceladas; volumen ya está en el seed.
 
 export const SELLERS = [
@@ -12,36 +13,36 @@ export const SELLERS = [
 ]
 
 export const PRODUCTS = [
-  { id: 'p-cafe-grano', name: 'Café en grano 1 kg', seller_id: 's-cafe-habana', category: 'Café', price: 18, stock: 32, rating: 4.9, reviews: 87, featured: true, emoji: '☕', description: 'Café cubano en grano, tueste medio, 1 kg. Molido al momento si lo prefieres.' },
-  { id: 'p-tazas', name: 'Set 2 tazas', seller_id: 's-cafe-habana', category: 'Café', price: 12, stock: 24, rating: 4.7, reviews: 41, featured: false, emoji: '☕', description: 'Set de 2 tazas de cerámica para espresso, hechas a mano.' },
-  { id: 'p-vasija', name: 'Vasija de barro', seller_id: 's-manos-artesanas', category: 'Artesanía', price: 25, stock: 14, rating: 4.9, reviews: 63, featured: true, emoji: '🏺', description: 'Vasija de barro torneada a mano, pieza única de taller habanero.' },
-  { id: 'p-bolso', name: 'Bolso tejido', seller_id: 's-manos-artesanas', category: 'Artesanía', price: 32, stock: 18, rating: 4.8, reviews: 52, featured: false, emoji: '👜', description: 'Bolso tejido a mano con fibras naturales, asa reforzada.' },
-  { id: 'p-monstera', name: 'Monstera', seller_id: 's-verde-vivo', category: 'Plantas', price: 15, stock: 21, rating: 4.8, reviews: 45, featured: true, emoji: '🌿', description: 'Monstera deliciosa en maceta de 20 cm, lista para interior luminoso.' },
-  { id: 'p-cactus', name: 'Set 3 cactus', seller_id: 's-verde-vivo', category: 'Plantas', price: 10, stock: 36, rating: 4.6, reviews: 29, featured: false, emoji: '🌵', description: 'Set de 3 cactus en macetas pequeñas, riego mínimo.' },
-  { id: 'p-audifonos', name: 'Audífonos Bluetooth', seller_id: 's-techhabana', category: 'Electrónica', price: 28, stock: 26, rating: 4.7, reviews: 78, featured: true, emoji: '🎧', description: 'Audífonos Bluetooth con micrófono, hasta 20 h de batería y estuche de carga.' },
-  { id: 'p-cargador', name: 'Cargador 65W', seller_id: 's-techhabana', category: 'Electrónica', price: 19, stock: 40, rating: 4.5, reviews: 54, featured: false, emoji: '🔌', description: 'Cargador rápido GaN 65W, USB-C, para laptop y móvil.' },
-  { id: 'p-vestido', name: 'Vestido de lino', seller_id: 's-moda-caribe', category: 'Ropa', price: 34, stock: 12, rating: 4.9, reviews: 38, featured: true, emoji: '👗', description: 'Vestido de lino fresco, corte holgado, tallas S–L.' },
-  { id: 'p-guayabera', name: 'Guayabera', seller_id: 's-moda-caribe', category: 'Ropa', price: 29, stock: 16, rating: 4.8, reviews: 47, featured: false, emoji: '👔', description: 'Guayabera clásica de algodón, bordado tradicional.' },
-  { id: 'p-vela', name: 'Vela Coco', seller_id: 's-dulce-hogar', category: 'Hogar', price: 9, stock: 30, rating: 4.8, reviews: 33, featured: true, emoji: '🕯️', description: 'Vela aromática de coco en frasco de vidrio, 40 h de quemado.' },
-  { id: 'p-manta', name: 'Manta tejida', seller_id: 's-dulce-hogar', category: 'Hogar', price: 26, stock: 11, rating: 4.9, reviews: 22, featured: false, emoji: '🧶', description: 'Manta tejida a mano, algodón suave, 130 × 170 cm.' },
+  { id: 'pr-cafe-1kg', name: 'Café en grano 1 kg', seller_id: 's-cafe-habana', category: 'Café', price: 18, stock: 24, rating: 4.9, reviews: 58, featured: true, emoji: '☕', description: 'Tostado medio, notas a cacao y caña. Grano entero.' },
+  { id: 'pr-cafe-taza', name: 'Set 2 tazas cerámica', seller_id: 's-cafe-habana', category: 'Hogar', price: 12, stock: 18, rating: 4.8, reviews: 31, featured: false, emoji: '🍶', description: 'Tazas artesanales esmaltadas, 250 ml cada una.' },
+  { id: 'pr-vasija', name: 'Vasija de barro pintada', seller_id: 's-manos-artesanas', category: 'Artesanía', price: 25, stock: 9, rating: 4.9, reviews: 44, featured: true, emoji: '🏺', description: 'Vasija hecha a mano, pintada con motivos caribeños.' },
+  { id: 'pr-bolso', name: 'Bolso tejido a mano', seller_id: 's-manos-artesanas', category: 'Artesanía', price: 32, stock: 7, rating: 4.9, reviews: 38, featured: false, emoji: '👜', description: 'Bolso de yarey tejido, asa de cuero vegetal.' },
+  { id: 'pr-monstera', name: 'Monstera deliciosa', seller_id: 's-verde-vivo', category: 'Plantas', price: 15, stock: 14, rating: 4.8, reviews: 29, featured: true, emoji: '🌿', description: 'Planta de interior en maceta de barro 20 cm. Incluye guía de cuidado.' },
+  { id: 'pr-cactus-set', name: 'Set 3 cactus', seller_id: 's-verde-vivo', category: 'Plantas', price: 10, stock: 22, rating: 4.7, reviews: 18, featured: false, emoji: '🌵', description: 'Tres cactus en macetas mini de cerámica.' },
+  { id: 'pr-audifonos', name: 'Audífonos Bluetooth', seller_id: 's-techhabana', category: 'Electrónica', price: 28, stock: 31, rating: 4.6, reviews: 87, featured: true, emoji: '🎧', description: 'Bluetooth 5.3, 30h de batería, estuche de carga.' },
+  { id: 'pr-cargador', name: 'Cargador rápido 65W', seller_id: 's-techhabana', category: 'Electrónica', price: 19, stock: 42, rating: 4.5, reviews: 64, featured: false, emoji: '🔌', description: 'GaN, 2x USB-C + 1x USB-A. Cable incluido.' },
+  { id: 'pr-vestido', name: 'Vestido lino Caribe', seller_id: 's-moda-caribe', category: 'Ropa', price: 34, stock: 11, rating: 4.8, reviews: 41, featured: true, emoji: '👗', description: 'Vestido de lino fresco, corte midi. Tallas XS-XL.' },
+  { id: 'pr-camisa', name: 'Camisa guayabera', seller_id: 's-moda-caribe', category: 'Ropa', price: 29, stock: 16, rating: 4.8, reviews: 35, featured: false, emoji: '👔', description: 'Guayabera blanca de algodón, bordado a mano.' },
+  { id: 'pr-vela', name: 'Vela aromática Coco', seller_id: 's-dulce-hogar', category: 'Hogar', price: 9, stock: 36, rating: 4.9, reviews: 27, featured: true, emoji: '🕯️', description: 'Vela de soja 200g, aroma coco y vainilla. 40h.' },
+  { id: 'pr-manta', name: 'Manta tejida', seller_id: 's-dulce-hogar', category: 'Hogar', price: 26, stock: 8, rating: 4.9, reviews: 19, featured: false, emoji: '🧶', description: 'Manta de algodón tejida a mano, 130x170 cm.' },
 ]
 
 export const PLACES = [
-  { id: 'l-san-jose', name: 'Mercado de Artesanía San José', type: 'Mercado', address: 'Av. del Puerto, La Habana Vieja', hours: '10:00–18:00', rating: 4.8, reviews: 320, emoji: '🏺', description: 'Artesanía cubana, souvenirs y talleres de artistas locales.' },
-  { id: 'l-plaza-vieja', name: 'Plaza Vieja', type: 'Plaza', address: 'Calle Teniente Rey, La Habana Vieja', hours: 'Abierto todo el día', rating: 4.9, reviews: 540, emoji: '🏛️', description: 'Plaza colonial restaurada con cafés, galerías y música en vivo.' },
-  { id: 'l-malecon', name: 'Malecón', type: 'Paseo', address: 'Malecón, La Habana', hours: 'Abierto todo el día', rating: 4.9, reviews: 890, emoji: '🌅', description: 'El paseo marítimo de 8 km, atardeceres y encuentro de la ciudad.' },
-  { id: 'l-fac', name: 'Fábrica de Arte Cubano', type: 'Centro cultural', address: 'Calle 26, Vedado', hours: '20:00–02:00', rating: 4.9, reviews: 610, emoji: '🎨', description: 'Arte, música, cine y diseño en una antigua fábrica.' },
-  { id: 'l-parque-central', name: 'Parque Central', type: 'Parque', address: 'Prado y Neptuno, Centro Habana', hours: 'Abierto todo el día', rating: 4.7, reviews: 210, emoji: '🌳', description: 'Parque histórico frente al Capitolio, punto de encuentro.' },
-  { id: 'l-carlos-iii', name: 'Centro Comercial Carlos III', type: 'Centro comercial', address: 'Av. Salvador Allende, Centro Habana', hours: '09:00–19:00', rating: 4.5, reviews: 180, emoji: '🛍️', description: 'Tiendas, servicios y gastronomía en el centro de la ciudad.' },
+  { id: 'p-san-jose', name: 'Mercado de Artesanía San José', type: 'Mercado', address: 'Avenida del Puerto, La Habana Vieja', hours: '10:00 - 18:00', rating: 4.8, reviews: 320, emoji: '🏺', description: 'Mercado artesanal frente al puerto. Cerámica, arte y souvenirs.' },
+  { id: 'p-plaza-vieja', name: 'Plaza Vieja', type: 'Plaza', address: 'Plaza Vieja, La Habana Vieja', hours: 'Abierto 24h', rating: 4.9, reviews: 540, emoji: '🏛️', description: 'Plaza colonial con cafés, galerías y música en vivo.' },
+  { id: 'p-malecon', name: 'Malecón', type: 'Paseo', address: 'Malecón, La Habana', hours: 'Abierto 24h', rating: 4.9, reviews: 890, emoji: '🌅', description: 'Paseo marítimo de 8 km. Atardeceres, música y encuentro local.' },
+  { id: 'p-fac', name: 'Fábrica de Arte Cubano', type: 'Centro cultural', address: 'Calle 26, Vedado', hours: '20:00 - 02:00', rating: 4.9, reviews: 610, emoji: '🎨', description: 'Arte, música, cine y gastronomía en una fábrica convertida.' },
+  { id: 'p-parque-central', name: 'Parque Central', type: 'Parque', address: 'Prado y Neptuno, Centro Habana', hours: 'Abierto 24h', rating: 4.7, reviews: 210, emoji: '🌳', description: 'Parque céntrico junto al Capitolio. Punto de encuentro clásico.' },
+  { id: 'p-carlos-iii', name: 'Centro Comercial Carlos III', type: 'Centro comercial', address: 'Carlos III, Centro Habana', hours: '09:00 - 19:00', rating: 4.5, reviews: 180, emoji: '🛍️', description: 'Tiendas, cafetería y servicios en el centro de la ciudad.' },
 ]
 
 export const EVENTS = [
-  { id: 'e-feria', title: 'Feria de Artesanía', date: '2026-10-24', time: '10:00', place: 'Mercado de Artesanía San José', price: 0, capacity: 400, attendees: 128, emoji: '🏺', description: 'Feria de artesanos con venta directa, demostraciones y música.' },
-  { id: 'e-fac', title: 'Noche de Arte FAC', date: '2026-10-30', time: '20:00', place: 'Fábrica de Arte Cubano', price: 5, capacity: 300, attendees: 214, emoji: '🎨', description: 'Noche de exposiciones, conciertos y proyecciones en la FAC.' },
-  { id: 'e-cafe', title: 'Taller de Café Cubano', date: '2026-11-07', time: '09:00', place: 'Café Habana, La Habana Vieja', price: 8, capacity: 30, attendees: 18, emoji: '☕', description: 'Aprende tueste, molido y colado del café cubano con cata incluida.' },
-  { id: 'e-caminata', title: 'Caminata por el Malecón', date: '2026-11-08', time: '17:00', place: 'Malecón, La Habana', price: 0, capacity: 80, attendees: 42, emoji: '🌅', description: 'Caminata grupal al atardecer con parada fotográfica y merienda.' },
-  { id: 'e-desfile', title: 'Desfile Moda Caribe', date: '2026-11-14', time: '18:00', place: 'Plaza Vieja', price: 0, capacity: 150, attendees: 67, emoji: '👗', description: 'Desfile de moda local con diseñadores emergentes.' },
-  { id: 'e-plantas', title: 'Intercambio de Plantas', date: '2026-11-21', time: '10:00', place: 'Parque Central', price: 0, capacity: 60, attendees: 23, emoji: '🌿', description: 'Trae una planta, llévate otra. Intercambio y consejos de cuidado.' },
+  { id: 'ev-feria-artesania', title: 'Feria de Artesanía', date: '2026-10-24', time: '10:00', place: 'Mercado de Artesanía San José', price: 0, capacity: 400, attendees: 128, emoji: '🏺', description: 'Feria con 40 artesanos, talleres en vivo y música.' },
+  { id: 'ev-noche-fac', title: 'Noche de Arte en la FAC', date: '2026-10-30', time: '20:00', place: 'Fábrica de Arte Cubano', price: 5, capacity: 300, attendees: 214, emoji: '🎨', description: 'Exposiciones, concierto y cine al aire libre.' },
+  { id: 'ev-taller-cafe', title: 'Taller de Café Cubano', date: '2026-11-07', time: '09:00', place: 'Plaza Vieja', price: 8, capacity: 30, attendees: 18, emoji: '☕', description: 'Cata y métodos de preparación: colador, espresso y frío.' },
+  { id: 'ev-malecon-run', title: 'Caminata al Atardecer por el Malecón', date: '2026-11-08', time: '17:00', place: 'Malecón', price: 0, capacity: 80, attendees: 42, emoji: '🌅', description: 'Caminata guiada de 5 km con parada fotográfica.' },
+  { id: 'ev-moda-caribe', title: 'Desfile Moda Caribe', date: '2026-11-14', time: '18:00', place: 'Centro Comercial Carlos III', price: 0, capacity: 150, attendees: 67, emoji: '👗', description: 'Colección nueva de diseño local, con venta en sitio.' },
+  { id: 'ev-plantas', title: 'Intercambio de Plantas', date: '2026-11-21', time: '10:00', place: 'Parque Central', price: 0, capacity: 60, attendees: 23, emoji: '🌿', description: 'Trae una planta, llévate otra. Charla de cuidado.' },
 ]
 
 export const CATEGORIES = ['Café', 'Artesanía', 'Plantas', 'Electrónica', 'Ropa', 'Hogar']

@@ -27,10 +27,13 @@ function normalize(rows, kind) {
     if (kind === 'sellers') {
       return rows.map((r) => ({
         id: r.id, name: r.name, category: r.category, location: r.location,
-        rating: Number(r.rating), reviews: Number(r.reviews), total: Number(r.total),
-        completed: Number(r.completed), cancelled: Number(r.cancelled),
+        rating: Number(r.rating), reviews: Number(r.reviews),
+        total: Number(r.trades_total ?? r.total),
+        completed: Number(r.trades_completed ?? r.completed),
+        cancelled: Number(r.trades_cancelled ?? r.cancelled),
         volume: Number(r.volume), score: Number(r.score),
-        emoji: r.emoji || '🏪', verified: Boolean(r.verified),
+        emoji: r.avatar_emoji || r.emoji || '🏪',
+        verified: Boolean(r.is_verified ?? r.verified),
       }))
     }
     if (kind === 'products') {
@@ -49,11 +52,19 @@ function normalize(rows, kind) {
       }))
     }
     if (kind === 'events') {
-      return rows.map((r) => ({
-        id: r.id, title: r.title, date: r.date, time: r.time, place: r.place,
-        price: Number(r.price), capacity: Number(r.capacity), attendees: Number(r.attendees),
-        emoji: r.emoji || '📅', description: r.description || '',
-      }))
+      return rows.map((r) => {
+        // Supabase guarda start_at timestamptz + place_name + attendees_count.
+        const start = String(r.start_at || '')
+        return {
+          id: r.id, title: r.title,
+          date: r.date || start.slice(0, 10),
+          time: r.time || start.slice(11, 16),
+          place: r.place_name || r.place,
+          price: Number(r.price), capacity: Number(r.capacity),
+          attendees: Number(r.attendees_count ?? r.attendees),
+          emoji: r.emoji || '📅', description: r.description || '',
+        }
+      })
     }
   } catch {
     return null
