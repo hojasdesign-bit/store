@@ -57,7 +57,6 @@ export default function App() {
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('store-cart') || '[]') } catch { return [] }
   })
-  const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -68,9 +67,6 @@ export default function App() {
       if (d.events) setEvents(d.events)
       setIsDemo(!(d.sellers && d.products && d.places && d.events))
     })
-    const onPrompt = (e) => { e.preventDefault(); setDeferredPrompt(e) }
-    window.addEventListener('beforeinstallprompt', onPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt)
   }, [])
 
   useEffect(() => {
@@ -114,13 +110,6 @@ export default function App() {
   const verifiedSellers = sellers.filter((s) => s.verified)
   const topPlaces = [...places].sort((a, b) => b.rating - a.rating).slice(0, 4)
 
-  const installApp = async () => {
-    if (!deferredPrompt) { showToast('En tu navegador: menú → Instalar app / Añadir a pantalla de inicio'); return }
-    deferredPrompt.prompt()
-    await deferredPrompt.userChoice
-    setDeferredPrompt(null)
-  }
-
   const orderWhatsApp = () => {
     if (cartDetailed.length === 0) return
     const lines = cartDetailed.map((i) => `• ${i.product.name} × ${i.qty} — ${fmtUSD(i.product.price * i.qty)}`).join('\n')
@@ -159,7 +148,6 @@ export default function App() {
         </div>
         <div className="top-actions">
           {isDemo && <span className="badge-demo">Datos demo</span>}
-          <button className="btn btn-play btn-sm" onClick={installApp}>Instalar</button>
           <button className="btn btn-ghost btn-sm cart-btn" onClick={() => goTab('cart')} aria-label="Abrir Biblioteca">📚 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}</button>
           <span className="avatar-top" aria-hidden="true">A</span>
         </div>
