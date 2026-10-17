@@ -9,14 +9,41 @@ const TABS = [
   { id: 'sellers', label: 'Vendedores', icon: '🏪' },
   { id: 'places', label: 'Lugares', icon: '📍' },
   { id: 'events', label: 'Eventos', icon: '📅' },
-  { id: 'cart', label: 'Carrito', icon: '🧺' },
+  { id: 'cart', label: 'Biblioteca', icon: '📚' },
 ]
+
+const HOME_MODES = [
+  { id: 'para-ti', label: 'Para ti' },
+  { id: 'mas-vendidos', label: 'Más vendidos' },
+  { id: 'nuevos', label: 'Nuevos' },
+  { id: 'categorias', label: 'Categorías' },
+]
+
+// Color de fondo del icono cuadrado por categoría (propio, no de marca).
+const CATEGORY_COLORS = {
+  'Café': '#fef3e2',
+  'Artesanía': '#fce8e6',
+  'Plantas': '#e6f4ea',
+  'Electrónica': '#e8f0fe',
+  'Ropa': '#f3e8fd',
+  'Hogar': '#fef7e0',
+}
+const iconBg = (category) => CATEGORY_COLORS[category] || '#f1f3f4'
 
 function fmtUSD(n) { return `$${Number(n).toFixed(0)} USD` }
 function priceLabel(p) { return p === 0 ? 'Gratis' : fmtUSD(p) }
 
+// Estrellas ★ según rating (0–5). Media estrella aproximada con ☆.
+function Stars({ rating, reviews }) {
+  const full = Math.floor(rating)
+  const half = rating - full >= 0.5
+  const stars = '★'.repeat(full) + (half ? '⯨' : '') + '☆'.repeat(5 - full - (half ? 1 : 0))
+  return <span className="stars" title={`${rating} de 5`}>{stars} <span className="stars-num">{rating.toFixed(1)}</span>{reviews != null && <span className="stars-reviews"> · {reviews} reseñas</span>}</span>
+}
+
 export default function App() {
   const [tab, setTab] = useState('home')
+  const [homeMode, setHomeMode] = useState('para-ti')
   const [sellers, setSellers] = useState(SEED_SELLERS)
   const [products, setProducts] = useState(SEED_PRODUCTS)
   const [places, setPlaces] = useState(SEED_PLACES)
@@ -39,7 +66,6 @@ export default function App() {
       if (d.products) setProducts(d.products)
       if (d.places) setPlaces(d.places)
       if (d.events) setEvents(d.events)
-      // Demo solo si alguna fuente falló / no hay config. Si todo vino de Supabase, no es demo.
       setIsDemo(!(d.sellers && d.products && d.places && d.events))
     })
     const onPrompt = (e) => { e.preventDefault(); setDeferredPrompt(e) }
@@ -52,7 +78,6 @@ export default function App() {
   }, [cart])
 
   const sellerById = (id) => sellers.find((s) => s.id === id) || seedSellerById(id)
-
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2200) }
 
   const addToCart = (product, qty = 1) => {
@@ -61,7 +86,7 @@ export default function App() {
       if (found) return prev.map((i) => i.id === product.id ? { ...i, qty: Math.min(i.qty + qty, product.stock) } : i)
       return [...prev, { id: product.id, qty }]
     })
-    showToast(`Añadido: ${product.name}`)
+    showToast(`Obtenido: ${product.name}`)
   }
   const changeQty = (id, delta) => {
     setCart((prev) => prev.map((i) => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i).filter((i) => i.qty > 0))
@@ -83,9 +108,11 @@ export default function App() {
   }, [products, sellers, query, category, sellerFilter])
 
   const featured = products.filter((p) => p.featured)
-  const upcomingEvents = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 2)
+  const bestSellers = [...products].sort((a, b) => b.reviews - a.reviews)
+  const newest = [...products].reverse()
+  const upcomingEvents = [...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(0, 3)
   const verifiedSellers = sellers.filter((s) => s.verified)
-  const topPlaces = [...places].sort((a, b) => b.rating - a.rating).slice(0, 3)
+  const topPlaces = [...places].sort((a, b) => b.rating - a.rating).slice(0, 4)
 
   const installApp = async () => {
     if (!deferredPrompt) { showToast('En tu navegador: menú → Instalar app / Añadir a pantalla de inicio'); return }
@@ -102,16 +129,39 @@ export default function App() {
   }
 
   const openSeller = (seller) => { setSelectedSeller(seller); setTab('sellers') }
+  const viewSellerProducts = (seller) => {
+    setSellerFilter(seller.id)
+    setCategory('Todas')
+    setTab('products')
+    setSelectedSeller(null)
+  }
   const sellerProducts = selectedSeller ? products.filter((p) => p.seller_id === selectedSeller.id) : []
+
+  const goTab = (id) => { setTab(id); if (id !== 'sellers') setSelectedSeller(null) }
 
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand"><span className="brand-mark">🛍️</span><div><strong>Store</strong><small>Mercado local · La Habana</small></div></div>
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">🛍️</span>
+          <strong className="brand-name">Store</strong>
+        </div>
+        <div className="top-search" role="search">
+          <span className="search-icon" aria-hidden="true">🔍</span>
+          <input
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') setTab('products') }}
+            placeholder="Buscar productos, vendedores, lugares…"
+            aria-label="Buscar en Store"
+          />
+          <button className="btn btn-play btn-sm" onClick={() => setTab('products')}>Buscar</button>
+        </div>
         <div className="top-actions">
           {isDemo && <span className="badge-demo">Datos demo</span>}
-          <button className="btn btn-ghost" onClick={installApp}>⬇ Instalar app</button>
-          <button className="btn btn-dark" onClick={() => setTab('cart')}>🧺 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}</button>
+          <button className="btn btn-play btn-sm" onClick={installApp}>Instalar</button>
+          <button className="btn btn-ghost btn-sm cart-btn" onClick={() => goTab('cart')} aria-label="Abrir Biblioteca">📚 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}</button>
+          <span className="avatar-top" aria-hidden="true">A</span>
         </div>
       </header>
 
@@ -120,49 +170,91 @@ export default function App() {
       <main className="main">
         {tab === 'home' && (
           <div>
-            <section className="hero">
-              <h1>Compra local,<br />en La Habana.</h1>
-              <p>Productos, vendedores, lugares y eventos — todo en un solo mercado.</p>
-              <div className="search-row">
-                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Busca café, artesanía, plantas…" aria-label="Buscar" />
-                <button className="btn btn-dark" onClick={() => setTab('products')}>Buscar</button>
+            <nav className="play-tabs" aria-label="Secciones de inicio">
+              {HOME_MODES.map((m) => (
+                <button key={m.id} className={homeMode === m.id ? 'play-tab active' : 'play-tab'} onClick={() => setHomeMode(m.id)}>{m.label}</button>
+              ))}
+            </nav>
+
+            {homeMode === 'categorias' && (
+              <section>
+                <h1 className="page-title">Categorías</h1>
+                <div className="chips">
+                  <button className={category === 'Todas' ? 'chip active' : 'chip'} onClick={() => setCategory('Todas')}>Todas</button>
+                  {CATEGORIES.map((c) => <button key={c} className={category === c ? 'chip active' : 'chip'} onClick={() => setCategory(c)}>{c}</button>)}
+                </div>
+                <p className="muted">{category === 'Todas' ? `${products.length} productos` : `${products.filter((p) => p.category === category).length} productos en ${category}`}</p>
+                <div className="grid">
+                  {products.filter((p) => category === 'Todas' || p.category === category).map((p) => (
+                    <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {homeMode === 'mas-vendidos' && (
+              <section>
+                <h1 className="page-title">Más vendidos</h1>
+                <p className="muted">Ordenados por reseñas. Las ventas mostradas son ventas del vendedor (operaciones completadas en el catálogo).</p>
+                <div className="carousel">
+                  {bestSellers.map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}
+                </div>
+              </section>
+            )}
+
+            {homeMode === 'nuevos' && (
+              <section>
+                <h1 className="page-title">Nuevos</h1>
+                <p className="muted">Añadidos recientemente (orden del catálogo, del último al primero).</p>
+                <div className="carousel">
+                  {newest.map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}
+                </div>
+              </section>
+            )}
+
+            {homeMode === 'para-ti' && (
+              <div>
+                <section>
+                  <div className="section-head"><h2>Recomendados para ti</h2><button className="link" onClick={() => setTab('products')}>Ver todos →</button></div>
+                  <div className="carousel">{featured.map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
+                </section>
+                <section>
+                  <div className="section-head"><h2>Más vendidos</h2><button className="link" onClick={() => setHomeMode('mas-vendidos')}>Ver todos →</button></div>
+                  <div className="carousel">{bestSellers.slice(0, 6).map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
+                </section>
+                <section>
+                  <div className="section-head"><h2>Nuevos</h2><button className="link" onClick={() => setHomeMode('nuevos')}>Ver todos →</button></div>
+                  <div className="carousel">{newest.slice(0, 6).map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
+                </section>
+                <section>
+                  <div className="section-head"><h2>Colección: próximos eventos</h2><button className="link" onClick={() => goTab('events')}>Ver todos →</button></div>
+                  <div className="collection-row">{upcomingEvents.map((ev) => <EventCard key={ev.id} ev={ev} compact />)}</div>
+                </section>
+                <section>
+                  <div className="section-head"><h2>Desarrolladores verificados</h2><button className="link" onClick={() => goTab('sellers')}>Ver todos →</button></div>
+                  <div className="list">{verifiedSellers.map((s) => <SellerCard key={s.id} s={s} onOpen={() => openSeller(s)} onViewProducts={() => viewSellerProducts(s)} />)}</div>
+                </section>
+                <section>
+                  <div className="section-head"><h2>Colección: lugares destacados</h2><button className="link" onClick={() => goTab('places')}>Ver todos →</button></div>
+                  <div className="collection-row">{topPlaces.map((pl) => <PlaceCard key={pl.id} pl={pl} compact />)}</div>
+                </section>
               </div>
-              <div className="hero-chips">
-                {CATEGORIES.map((c) => <button key={c} onClick={() => { setCategory(c); setTab('products') }}>{c}</button>)}
-              </div>
-            </section>
-
-            <section>
-              <div className="section-head"><h2>Destacados</h2><button className="link" onClick={() => setTab('products')}>Ver todos →</button></div>
-              <div className="grid">{featured.slice(0, 6).map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
-            </section>
-
-            <section>
-              <div className="section-head"><h2>Próximos eventos</h2><button className="link" onClick={() => setTab('events')}>Ver todos →</button></div>
-              <div className="list">{upcomingEvents.map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
-            </section>
-
-            <section>
-              <div className="section-head"><h2>Vendedores verificados</h2><button className="link" onClick={() => setTab('sellers')}>Ver todos →</button></div>
-              <div className="list">{verifiedSellers.map((s) => <SellerCard key={s.id} s={s} onOpen={() => openSeller(s)} />)}</div>
-            </section>
-
-            <section>
-              <div className="section-head"><h2>Lugares top</h2><button className="link" onClick={() => setTab('places')}>Ver todos →</button></div>
-              <div className="list">{topPlaces.map((pl) => <PlaceCard key={pl.id} pl={pl} />)}</div>
-            </section>
+            )}
           </div>
         )}
 
         {tab === 'products' && (
           <div>
             <h1 className="page-title">Productos</h1>
-            <input className="search-full" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar producto o vendedor…" aria-label="Buscar productos" />
-            <div className="filters">
-              <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Categoría"><option>Todas</option>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
-              <select value={sellerFilter} onChange={(e) => setSellerFilter(e.target.value)} aria-label="Vendedor"><option value="Todos">Todos los vendedores</option>{sellers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+            <div className="chips">
+              <button className={category === 'Todas' ? 'chip active' : 'chip'} onClick={() => setCategory('Todas')}>Todas</button>
+              {CATEGORIES.map((c) => <button key={c} className={category === c ? 'chip active' : 'chip'} onClick={() => setCategory(c)}>{c}</button>)}
             </div>
-            <p className="muted">{filteredProducts.length} productos</p>
+            <div className="filters">
+              <select value={sellerFilter} onChange={(e) => setSellerFilter(e.target.value)} aria-label="Vendedor"><option value="Todos">Todos los vendedores</option>{sellers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
+              {(sellerFilter !== 'Todos' || category !== 'Todas' || query.trim()) && <button className="btn btn-ghost btn-sm" onClick={() => { setSellerFilter('Todos'); setCategory('Todas'); setQuery('') }}>Limpiar filtros</button>}
+            </div>
+            <p className="muted">{filteredProducts.length} productos{sellerFilter !== 'Todos' ? ` · ${sellerById(sellerFilter)?.name}` : ''}</p>
             <div className="grid">{filteredProducts.map((p) => <ProductCard key={p.id} p={p} seller={sellerById(p.seller_id)} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
             {filteredProducts.length === 0 && <p className="empty">Sin resultados. Prueba otra búsqueda o categoría.</p>}
           </div>
@@ -174,20 +266,28 @@ export default function App() {
             {selectedSeller ? (
               <div className="seller-profile">
                 <button className="link" onClick={() => setSelectedSeller(null)}>← Todos los vendedores</button>
-                <div className="profile-head"><span className="avatar-lg">{selectedSeller.emoji}</span><div><h2>{selectedSeller.name} {selectedSeller.verified && '✓'}</h2><p>{selectedSeller.category} · {selectedSeller.location}</p><p>⭐ {selectedSeller.rating} · {selectedSeller.reviews} reseñas · Score {selectedSeller.score}</p></div></div>
+                <div className="profile-head">
+                  <span className="avatar-lg" style={{ background: '#e6f4ea' }}>{selectedSeller.emoji}</span>
+                  <div>
+                    <h2>{selectedSeller.name} {selectedSeller.verified && <span className="verified" title="Verificado">✓</span>}</h2>
+                    <p className="muted">{selectedSeller.category} · {selectedSeller.location}</p>
+                    <p><Stars rating={selectedSeller.rating} reviews={selectedSeller.reviews} /> · Score {selectedSeller.score}</p>
+                    <button className="btn btn-play btn-sm" onClick={() => viewSellerProducts(selectedSeller)}>Ver apps del desarrollador</button>
+                  </div>
+                </div>
                 <div className="stats">
-                  <div><strong>{selectedSeller.completed}</strong><span>Completadas</span></div>
+                  <div><strong>{selectedSeller.completed}</strong><span>Ventas completadas</span></div>
                   <div><strong>{selectedSeller.cancelled}</strong><span>Canceladas</span></div>
                   <div><strong>{fmtUSD(selectedSeller.volume)}</strong><span>Volumen</span></div>
                   <div><strong>{selectedSeller.total}</strong><span>Operaciones</span></div>
                 </div>
-                <p className="muted">Reseñas ({selectedSeller.reviews}) ≤ operaciones completadas ({selectedSeller.completed}). Total = completadas + canceladas.</p>
+                <p className="muted">Reseñas ({selectedSeller.reviews}) ≤ ventas completadas ({selectedSeller.completed}). Total = completadas + canceladas.</p>
                 <h3>Productos de {selectedSeller.name}</h3>
                 <div className="grid">{sellerProducts.map((p) => <ProductCard key={p.id} p={p} seller={selectedSeller} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} />)}</div>
                 {sellerProducts.length === 0 && <p className="empty">Este vendedor aún no tiene productos.</p>}
               </div>
             ) : (
-              <div className="list">{sellers.map((s) => <SellerCard key={s.id} s={s} onOpen={() => openSeller(s)} />)}</div>
+              <div className="list">{sellers.map((s) => <SellerCard key={s.id} s={s} onOpen={() => openSeller(s)} onViewProducts={() => viewSellerProducts(s)} />)}</div>
             )}
           </div>
         )}
@@ -195,26 +295,29 @@ export default function App() {
         {tab === 'places' && (
           <div>
             <h1 className="page-title">Lugares</h1>
-            <div className="list">{places.map((pl) => <PlaceCard key={pl.id} pl={pl} />)}</div>
+            <p className="muted">Colecciones de lugares en La Habana.</p>
+            <div className="collection-grid">{places.map((pl) => <PlaceCard key={pl.id} pl={pl} />)}</div>
           </div>
         )}
 
         {tab === 'events' && (
           <div>
             <h1 className="page-title">Eventos y actividades</h1>
-            <div className="list">{[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
+            <p className="muted">Colecciones de eventos. Asistentes ≤ capacidad en todos los eventos.</p>
+            <div className="collection-grid">{[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
           </div>
         )}
 
         {tab === 'cart' && (
           <div>
-            <h1 className="page-title">Carrito</h1>
+            <h1 className="page-title">Biblioteca</h1>
+            <p className="muted">Tus productos obtenidos. Equivale al carrito: se guarda en este dispositivo.</p>
             <p className="demo-note">Demo — sin pago real. El pedido se envía por WhatsApp.</p>
-            {cartDetailed.length === 0 ? <p className="empty">Tu carrito está vacío. Explora productos y añade alguno. 🧺</p> : (
+            {cartDetailed.length === 0 ? <p className="empty">Tu Biblioteca está vacía. Explora productos y pulsa Obtener. 📚</p> : (
               <div>
                 <div className="list">{cartDetailed.map((i) => (
                   <div className="card cart-row" key={i.id}>
-                    <span className="emoji-md">{i.product.emoji}</span>
+                    <span className="app-icon sm" style={{ background: iconBg(i.product.category) }}>{i.product.emoji}</span>
                     <div className="cart-info"><strong>{i.product.name}</strong><small>{sellerById(i.product.seller_id)?.name} · {fmtUSD(i.product.price)}</small>
                       <div className="qty"><button onClick={() => changeQty(i.id, -1)}>−</button><span>{i.qty}</span><button onClick={() => changeQty(i.id, 1)}>+</button></div>
                     </div>
@@ -222,8 +325,8 @@ export default function App() {
                   </div>
                 ))}</div>
                 <div className="total-row"><span>Total</span><strong>{fmtUSD(cartTotal)}</strong></div>
-                <button className="btn btn-dark btn-block" onClick={orderWhatsApp}>Pedir por WhatsApp 💬</button>
-                <button className="btn btn-ghost btn-block" onClick={() => setCart([])}>Vaciar carrito</button>
+                <button className="btn btn-play btn-block" onClick={orderWhatsApp}>Obtener y pedir por WhatsApp 💬</button>
+                <button className="btn btn-ghost btn-block" onClick={() => setCart([])}>Vaciar Biblioteca</button>
               </div>
             )}
           </div>
@@ -232,7 +335,7 @@ export default function App() {
 
       <nav className="bottom-nav">
         {TABS.map((t) => (
-          <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => { setTab(t.id); if (t.id !== 'sellers') setSelectedSeller(null) }}>
+          <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => goTab(t.id)}>
             <span>{t.icon}</span><small>{t.label}{t.id === 'cart' && cartCount > 0 ? ` (${cartCount})` : ''}</small>
           </button>
         ))}
@@ -240,15 +343,37 @@ export default function App() {
 
       {selectedProduct && (
         <div className="modal-backdrop" onClick={() => setSelectedProduct(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={`Ficha de ${selectedProduct.name}`}>
             <button className="modal-close" onClick={() => setSelectedProduct(null)}>✕</button>
-            <div className="emoji-xl">{selectedProduct.emoji}</div>
-            <h2>{selectedProduct.name}</h2>
-            <p className="muted">{sellerById(selectedProduct.seller_id)?.name} · {selectedProduct.category}</p>
+            <div className="detail-head">
+              <span className="app-icon xl" style={{ background: iconBg(selectedProduct.category) }}>{selectedProduct.emoji}</span>
+              <div>
+                <h2>{selectedProduct.name}</h2>
+                <button className="link dev-link" onClick={() => { const s = sellerById(selectedProduct.seller_id); setSelectedProduct(null); if (s) openSeller(s) }}>{sellerById(selectedProduct.seller_id)?.name}</button>
+                <p className="muted">{selectedProduct.category}</p>
+                <Stars rating={selectedProduct.rating} reviews={selectedProduct.reviews} />
+                <p className="muted">{sellerById(selectedProduct.seller_id)?.completed} ventas del vendedor · Stock: {selectedProduct.stock}</p>
+              </div>
+            </div>
+            <div className="detail-actions">
+              <button className="btn btn-play btn-block" onClick={() => { addToCart(selectedProduct); setSelectedProduct(null) }}>Obtener · {priceLabel(selectedProduct.price)}</button>
+            </div>
+            <h3>Capturas</h3>
+            <div className="screenshots">
+              <span className="shot" style={{ background: iconBg(selectedProduct.category) }}>{selectedProduct.emoji}</span>
+              <span className="shot shot-alt">{selectedProduct.emoji}</span>
+              <span className="shot" style={{ background: iconBg(selectedProduct.category) }}>{selectedProduct.emoji}</span>
+            </div>
+            <h3>Acerca de este producto</h3>
             <p>{selectedProduct.description}</p>
-            <p>⭐ {selectedProduct.rating} · {selectedProduct.reviews} reseñas · Stock: {selectedProduct.stock}</p>
-            <div className="total-row"><span>Precio</span><strong>{fmtUSD(selectedProduct.price)}</strong></div>
-            <button className="btn btn-dark btn-block" onClick={() => { addToCart(selectedProduct); setSelectedProduct(null) }}>Añadir al carrito 🧺</button>
+            <h3>Información</h3>
+            <dl className="info-list">
+              <div><dt>Vendedor</dt><dd>{sellerById(selectedProduct.seller_id)?.name}</dd></div>
+              <div><dt>Categoría</dt><dd>{selectedProduct.category}</dd></div>
+              <div><dt>Precio</dt><dd>{priceLabel(selectedProduct.price)}</dd></div>
+              <div><dt>Stock</dt><dd>{selectedProduct.stock} unidades</dd></div>
+              <div><dt>Valoración</dt><dd>{selectedProduct.rating.toFixed(1)} · {selectedProduct.reviews} reseñas</dd></div>
+            </dl>
           </div>
         </div>
       )}
@@ -260,53 +385,57 @@ export default function App() {
 
 function ProductCard({ p, seller, onOpen, onAdd }) {
   return (
-    <article className="card product-card">
+    <article className="card app-card">
       <button className="card-click" onClick={onOpen} aria-label={`Ver ${p.name}`}>
-        <span className="emoji-lg">{p.emoji}</span>
-        <h3>{p.name}</h3>
-        <p className="muted">{seller?.name} · {p.category}</p>
-        <p>⭐ {p.rating} · Stock {p.stock}</p>
-        <strong className="price">{fmtUSD(p.price)}</strong>
+        <span className="app-icon" style={{ background: iconBg(p.category) }}>{p.emoji}</span>
+        <span className="app-meta">
+          <strong className="app-name">{p.name}</strong>
+          <span className="app-dev">{seller?.name}</span>
+          <Stars rating={p.rating} reviews={p.reviews} />
+          <span className="app-sales">{seller?.completed} ventas del vendedor · Stock {p.stock}</span>
+          <strong className="price">{priceLabel(p.price)}</strong>
+        </span>
       </button>
-      <button className="btn btn-dark btn-block" onClick={onAdd}>Añadir 🧺</button>
+      <button className="btn btn-play btn-sm obtain-btn" onClick={onAdd}>Obtener</button>
     </article>
   )
 }
 
-function SellerCard({ s, onOpen }) {
+function SellerCard({ s, onOpen, onViewProducts }) {
   return (
     <article className="card seller-row">
       <span className="avatar">{s.emoji}</span>
       <button className="card-click left" onClick={onOpen}>
-        <strong>{s.name} {s.verified && <span title="Verificado">✓</span>}</strong>
+        <strong>{s.name} {s.verified && <span className="verified" title="Verificado">✓</span>}</strong>
         <small>{s.category} · {s.location}</small>
-        <small>⭐ {s.rating} · {s.reviews} reseñas · Score {s.score} · {s.total} operaciones</small>
+        <small><Stars rating={s.rating} reviews={s.reviews} /> · Score {s.score}</small>
+        <small>{s.total} operaciones · {s.completed} ventas completadas</small>
       </button>
-      <span className="score-ring">{s.score}</span>
+      <button className="btn btn-ghost btn-sm" onClick={onViewProducts}>Ver apps</button>
     </article>
   )
 }
 
-function PlaceCard({ pl }) {
+function PlaceCard({ pl, compact }) {
   return (
-    <article className="card place-row">
-      <span className="emoji-md">{pl.emoji}</span>
-      <div><strong>{pl.name}</strong><small>{pl.type} · {pl.address}</small><small>🕒 {pl.hours} · ⭐ {pl.rating} · {pl.reviews} reseñas</small><p className="muted">{pl.description}</p></div>
+    <article className={`card place-card ${compact ? 'compact' : ''}`}>
+      <span className="collection-emoji">{pl.emoji}</span>
+      <div className="collection-body"><strong>{pl.name}</strong><small>{pl.type} · {pl.address}</small><small>🕒 {pl.hours}</small><Stars rating={pl.rating} reviews={pl.reviews} /><p className="muted">{pl.description}</p></div>
     </article>
   )
 }
 
-function EventCard({ ev }) {
+function EventCard({ ev, compact }) {
   const pct = Math.min(100, Math.round((ev.attendees / Math.max(1, ev.capacity)) * 100))
   return (
-    <article className="card event-row">
-      <span className="emoji-md">{ev.emoji}</span>
+    <article className={`card event-card ${compact ? 'compact' : ''}`}>
+      <span className="collection-emoji">{ev.emoji}</span>
       <div className="event-body">
         <strong>{ev.title}</strong>
         <small>📅 {ev.date} · {ev.time} · {ev.place}</small>
         <small>{priceLabel(ev.price)} · {ev.attendees}/{ev.capacity} asistentes</small>
         <div className="bar"><div style={{ width: `${pct}%` }} /></div>
-        <small className="muted">{pct}% ocupación · {ev.description}</small>
+        <small className="muted">{pct}% ocupación{compact ? '' : ` · ${ev.description}`}</small>
       </div>
     </article>
   )

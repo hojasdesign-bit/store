@@ -1,8 +1,20 @@
 # Store · Mercado local de La Habana
 
 Tienda y catálogo de vendedores / actividades y eventos / lugares.
-React + Vite, español, móvil primero. Fondo crema #FAF8F3, títulos
-serif Fraunces, botones negros. Sin copiar logos de marcas.
+React + Vite, español, móvil primero.
+
+## Visualidad
+
+Visualidad **inspirada en Play Store** (layout y componentes tipo
+ficha de app: icono cuadrado, desarrollador, estrellas, carruseles,
+tabs Para ti / Más vendidos / Nuevos / Categorías, botón verde
+«Obtener»), con **marca propia «Store»**.
+
+- Fondo blanco #ffffff / gris #f8f9fa, texto #202124, acento verde
+  #01875a. Tipografía sans Roboto / Inter.
+- **No** es una app de Google, no usa logo, wordmark ni assets de
+  Google, no usa el triángulo de Play ni afirma ser Play Store.
+- El logo es propio: texto «Store» + bolsa genérica 🛍️.
 
 ## Desarrollo
 
@@ -20,6 +32,8 @@ npm run dev
   y muestra «Datos demo».
 - **Nunca** incluir claves reales en el repo. Solo `.env.example`
   con placeholders.
+- Datos del seed sin cambios: precios, ratings, ventas
+  (operaciones completadas), asistentes ≤ capacidad.
 
 ## Build
 
@@ -30,13 +44,16 @@ npm run build
 Destino: Cloudflare Pages, proyecto `store`, repo `hojasdesign-bit/store`.
 (No hay commit ni deploy en este paso: solo código local + build.)
 
-## PWA / Play Store
+## PWA / publicación en Play Store
 
-Ver `docs/play-store.md`. Manifest en `public/manifest.webmanifest`,
-service worker en `public/sw.js` (solo producción), iconos en
-`public/icons/`. Botón «Instalar app» con `beforeinstallprompt`.
+Ver `docs/play-store.md`. Manifest en `public/manifest.webmanifest`
+(theme #01875a, background #ffffff), service worker en `public/sw.js`
+(solo producción), iconos en `public/icons/`. Botón «Instalar» con
+`beforeinstallprompt`. La publicación en Play Store (vía TWA /
+PWABuilder) sigue pendiente; ver la guía.
 
-## Carrito
+## Biblioteca
 
-Guardado en `localStorage`. «Pedir por WhatsApp» abre `wa.me` con el
+La Biblioteca equivale al carrito: productos obtenidos, guardados en
+`localStorage`. «Obtener y pedir por WhatsApp» abre `wa.me` con el
 texto del pedido. **Demo — sin pago real.**
