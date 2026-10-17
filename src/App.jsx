@@ -57,6 +57,11 @@ export default function App() {
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('store-cart') || '[]') } catch { return [] }
   })
+  // RSVP de eventos estilo Facebook Events: { [eventId]: 'going' | 'interested' }
+  const [rsvp, setRsvp] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('store-event-rsvp') || '{}') } catch { return {} }
+  })
+  const [eventFilter, setEventFilter] = useState('Todos')
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -72,6 +77,19 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('store-cart', JSON.stringify(cart))
   }, [cart])
+
+  useEffect(() => {
+    localStorage.setItem('store-event-rsvp', JSON.stringify(rsvp))
+  }, [rsvp])
+
+  const toggleRsvp = (eventId, kind) => {
+    setRsvp((prev) => {
+      const next = { ...prev }
+      if (next[eventId] === kind) delete next[eventId]
+      else next[eventId] = kind
+      return next
+    })
+  }
 
   const sellerById = (id) => sellers.find((s) => s.id === id) || seedSellerById(id)
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2200) }
@@ -216,7 +234,7 @@ export default function App() {
                 </section>
                 <section>
                   <div className="section-head"><h2>Colección: próximos eventos</h2><button className="link" onClick={() => goTab('events')}>Ver todos →</button></div>
-                  <div className="collection-row">{upcomingEvents.map((ev) => <EventCard key={ev.id} ev={ev} compact />)}</div>
+                  <div className="collection-row">{upcomingEvents.map((ev) => <EventCard key={ev.id} ev={ev} compact rsvp={rsvp[ev.id]} onRsvp={toggleRsvp} />)}</div>
                 </section>
                 <section>
                   <div className="section-head"><h2>Desarrolladores verificados</h2><button className="link" onClick={() => goTab('sellers')}>Ver todos →</button></div>
@@ -291,8 +309,24 @@ export default function App() {
         {tab === 'events' && (
           <div>
             <h1 className="page-title">Eventos y actividades</h1>
-            <p className="muted">Colecciones de eventos. Asistentes ≤ capacidad en todos los eventos.</p>
-            <div className="collection-grid">{[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).map((ev) => <EventCard key={ev.id} ev={ev} />)}</div>
+            <p className="muted">Descubre eventos como en Facebook Events: marca «Me interesa» o «Voy». Asistentes ≤ capacidad en todos los eventos.</p>
+            <div className="chips">
+              {['Todos', 'Gratis', 'De pago', 'Mis eventos'].map((f) => (
+                <button key={f} className={eventFilter === f ? 'chip active' : 'chip'} onClick={() => setEventFilter(f)}>{f}</button>
+              ))}
+            </div>
+            <div className="collection-grid">{[...events].sort((a, b) => String(a.date).localeCompare(String(b.date))).filter((ev) => {
+              if (eventFilter === 'Gratis') return ev.price === 0
+              if (eventFilter === 'De pago') return ev.price > 0
+              if (eventFilter === 'Mis eventos') return Boolean(rsvp[ev.id])
+              return true
+            }).map((ev) => <EventCard key={ev.id} ev={ev} rsvp={rsvp[ev.id]} onRsvp={toggleRsvp} />)}</div>
+            {[...events].filter((ev) => {
+              if (eventFilter === 'Gratis') return ev.price === 0
+              if (eventFilter === 'De pago') return ev.price > 0
+              if (eventFilter === 'Mis eventos') return Boolean(rsvp[ev.id])
+              return true
+            }).length === 0 && <p className="empty">Sin eventos en este filtro. Marca «Me interesa» o «Voy» en un evento para verlo en Mis eventos.</p>}
           </div>
         )}
 
@@ -413,17 +447,37 @@ function PlaceCard({ pl, compact }) {
   )
 }
 
-function EventCard({ ev, compact }) {
+// Eventos con referencia a Facebook Events (sin marca Facebook): portada,
+// bloque de fecha (mes + día), organizador, hora, lugar y botones
+// «Me interesa» / «Voy». Interesados se deriva de asistentes (×1.6).
+const EVENT_MONTHS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
+
+function EventCard({ ev, compact, rsvp, onRsvp }) {
   const pct = Math.min(100, Math.round((ev.attendees / Math.max(1, ev.capacity)) * 100))
+  const going = ev.attendees + (rsvp === 'going' ? 1 : 0)
+  const interested = Math.round(ev.attendees * 1.6) + (rsvp === 'interested' ? 1 : 0)
+  const day = String(ev.date || '').slice(8, 10)
+  const month = EVENT_MONTHS[Number(String(ev.date || '').slice(5, 7)) - 1] || ''
   return (
-    <article className={`card event-card ${compact ? 'compact' : ''}`}>
-      <span className="collection-emoji">{ev.emoji}</span>
+    <article className={`card event-card fb-event ${compact ? 'compact' : ''}`}>
+      <div className="event-cover" aria-hidden="true"><span>{ev.emoji}</span></div>
       <div className="event-body">
-        <strong>{ev.title}</strong>
-        <small>📅 {ev.date} · {ev.time} · {ev.place}</small>
-        <small>{priceLabel(ev.price)} · {ev.attendees}/{ev.capacity} asistentes</small>
+        <div className="fb-event-head">
+          <div className="date-badge"><span className="date-month">{month}</span><span className="date-day">{day}</span></div>
+          <div className="fb-event-title">
+            <strong>{ev.title}</strong>
+            <small>Organiza · {ev.place}</small>
+            <small>🕒 {ev.date} · {ev.time}</small>
+            <small>📍 {ev.place}</small>
+          </div>
+        </div>
+        <small className="fb-event-counts">{going} van · {interested} interesados · {priceLabel(ev.price)}</small>
         <div className="bar"><div style={{ width: `${pct}%` }} /></div>
-        <small className="muted">{pct}% ocupación{compact ? '' : ` · ${ev.description}`}</small>
+        <small className="muted">{going}/{ev.capacity} van · {pct}% ocupación{compact ? '' : ` · ${ev.description}`}</small>
+        <div className="rsvp-row">
+          <button className={rsvp === 'interested' ? 'rsvp-btn active' : 'rsvp-btn'} onClick={() => onRsvp && onRsvp(ev.id, 'interested')} aria-pressed={rsvp === 'interested'}>⭐ Me interesa</button>
+          <button className={rsvp === 'going' ? 'rsvp-btn active primary' : 'rsvp-btn primary'} onClick={() => onRsvp && onRsvp(ev.id, 'going')} aria-pressed={rsvp === 'going'}>✓ Voy</button>
+        </div>
       </div>
     </article>
   )

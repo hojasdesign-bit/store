@@ -75,6 +75,20 @@ h1,h2,h3{font-family:Roboto,Inter,system-ui,sans-serif;line-height:1.2}
 .place-card,.event-card{display:flex;flex-direction:column;gap:10px;align-items:stretch}
 .collection-emoji{font-size:40px;width:100%;height:76px;border-radius:12px;background:#f1f3f4;display:grid;place-items:center}
 .collection-body,.event-body{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+/* Eventos estilo Facebook Events (referencia visual, sin marca). */
+.event-cover{width:100%;height:96px;border-radius:12px;background:#e6f4ea;display:grid;place-items:center;font-size:48px}
+.fb-event-head{display:flex;gap:12px;align-items:flex-start}
+.date-badge{width:52px;min-width:52px;border:1px solid #dadce0;border-radius:12px;overflow:hidden;text-align:center;background:#fff}
+.date-month{display:block;background:#01875a;color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 0}
+.date-day{display:block;font-size:22px;font-weight:700;line-height:1.4;color:#202124}
+.fb-event-title{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fb-event-title small{display:block;color:#5f6368}
+.fb-event-counts{color:#202124;font-weight:500}
+.rsvp-row{display:flex;gap:8px;margin-top:8px}
+.rsvp-btn{flex:1;border:1px solid #dadce0;background:#f1f3f4;border-radius:20px;padding:9px 8px;cursor:pointer;font-size:13px;font-weight:600;color:#202124}
+.rsvp-btn.active{background:#e6f4ea;border-color:#01875a;color:#01875a}
+.rsvp-btn.primary{background:#01875a;border-color:#01875a;color:#fff}
+.rsvp-btn.primary.active{background:#01724b}
 .collection-body small,.event-body small{display:block;color:#5f6368}
 .bar{height:8px;background:#e8eaed;border-radius:999px;overflow:hidden;margin:6px 0}
 .bar div{height:100%;background:#01875a}
