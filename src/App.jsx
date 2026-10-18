@@ -315,11 +315,6 @@ export default function App() {
           <span>🔍</span>
           <input value={query} onChange={(e) => { setQuery(e.target.value); if (view !== 'marketplace') setView('marketplace') }} placeholder="Buscar en Store" aria-label="Buscar en Store" />
         </div>
-        <nav className="fb-topnav">
-          {NAV.slice(0, 5).map((n) => (
-            <button key={n.id} className={view === n.id ? 'active' : ''} onClick={() => go(n.id)} title={n.label}><span>{n.icon}</span></button>
-          ))}
-        </nav>
         <div className="fb-top-actions">
           {isDemo && <span className="fb-badge">Datos demo</span>}
           <button className="fb-icon-btn" onClick={() => go('library')} title="Biblioteca">📚{cartCount > 0 && <b className="fb-count">{cartCount}</b>}</button>
@@ -327,24 +322,19 @@ export default function App() {
         </div>
       </header>
 
+      <nav className="fb-tabs" aria-label="Secciones">
+        {NAV.map((n) => (
+          <button key={n.id} className={view === n.id ? 'fb-tab active' : 'fb-tab'} onClick={() => go(n.id)}><span>{n.icon}</span> {n.label}</button>
+        ))}
+        <span className="fb-tabs-spacer" />
+        <button className="fb-btn-primary fb-tab-cta" onClick={() => openCreate('product')}>+ Vender algo</button>
+        <button className="fb-btn fb-tab-cta" onClick={() => openCreate('event')}>+ Crear evento</button>
+        <button className="fb-btn fb-tab-cta" onClick={() => openCreate('place')}>+ Crear lugar</button>
+      </nav>
+
       {isDemo && <div className="fb-demo">Datos demo — configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY para datos reales. Demo — sin pago real.</div>}
 
       <div className="fb-layout">
-        <aside className="fb-sidebar">
-          {NAV.map((n) => (
-            <button key={n.id} className={view === n.id ? 'side-item active' : 'side-item'} onClick={() => go(n.id)}><span>{n.icon}</span> {n.label}</button>
-          ))}
-          <hr />
-          <p className="side-title">Categorías</p>
-          {CATEGORIES.map((c) => (
-            <button key={c} className="side-item" onClick={() => { setCategory(c); go('marketplace') }}>🛒 {c}</button>
-          ))}
-          <hr />
-          <button className="fb-btn-primary side-cta" onClick={() => openCreate('product')}>+ Vender algo</button>
-          <button className="fb-btn side-cta" onClick={() => openCreate('event')}>+ Crear evento</button>
-          <button className="fb-btn side-cta" onClick={() => openCreate('place')}>+ Crear lugar</button>
-        </aside>
-
         <main className="fb-main">
           {view === 'feed' && (
             <div className="fb-feed">
