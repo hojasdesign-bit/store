@@ -3,8 +3,8 @@ import { CATEGORIES, EVENTS as SEED_EVENTS, PLACES as SEED_PLACES, PRODUCTS as S
 import { createRow, deleteRow, hasSupabaseConfig, loadStoreData, updateRow } from './supabase.js'
 import './App.css'
 
-// Store — visualidad INSPIRADA en Facebook (layout y patrones), marca propia.
-// Nunca logo "f", wordmark ni assets de Facebook. Eventos estilo Facebook
+// Store — visualidad INSPIRADA en Play Store (layout y patrones), marca propia.
+// Sin logo, wordmark ni assets de Google. Eventos con RSVP (Me interesa / Voy).
 // Events, productos como Marketplace. CRUD + persistencia local/Supabase.
 
 const MY_SELLER = { id: 's-yo', name: 'Mi tienda (yo)', category: 'Mi tienda', location: 'La Habana', rating: 5, reviews: 0, total: 0, completed: 0, cancelled: 0, volume: 0, score: 100, emoji: '🏪', verified: false }
@@ -48,6 +48,7 @@ export default function App() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todas')
   const [sellerFilter, setSellerFilter] = useState('Todos')
+  const [sellerTab, setSellerTab] = useState('Todos')
   const [priceMin, setPriceMin] = useState('')
   const [priceMax, setPriceMax] = useState('')
   const [condition, setCondition] = useState('Todas')
@@ -392,7 +393,7 @@ export default function App() {
             <div className="fb-feed">
               <section className="fb-card">
                 <h1 className="fb-title">Eventos</h1>
-                <p className="fb-muted">Estilo Facebook Events: marca «Me interesa» o «Voy». Demo: puedes gestionar cualquier publicación.</p>
+                <p className="fb-muted">Marca «Me interesa» o «Voy». Demo: puedes gestionar cualquier publicación.</p>
                 <input className="fb-input" placeholder="Buscar eventos…" value={eventQuery} onChange={(e) => setEventQuery(e.target.value)} aria-label="Buscar eventos" />
                 <div className="fb-chips">
                   {['Todos', 'Próximos', 'Pasados', 'Mis eventos', 'Que organizo'].map((f) => (
@@ -420,15 +421,17 @@ export default function App() {
             <div className="fb-feed">
               <section className="fb-card">
                 <h1 className="fb-title">Vendedores</h1>
+                <p className="fb-muted">Catálogo de vendedores como en una tienda de apps: cada vendedor es un desarrollador con sus anuncios.</p>
                 {selectedSeller ? (
                   <div>
                     <button className="fb-link" onClick={() => setSelectedSeller(null)}>← Todos los vendedores</button>
-                    <div className="fb-profile">
-                      <span className="fb-avatar-lg">{selectedSeller.emoji}</span>
+                    <div className="play-dev-head">
+                      <span className="play-dev-icon">{selectedSeller.emoji}</span>
                       <div>
                         <h2>{selectedSeller.name} {selectedSeller.verified && <span className="fb-verified">✓</span>}</h2>
                         <p className="fb-muted">{selectedSeller.category} · {selectedSeller.location}</p>
                         <p>★ {selectedSeller.rating.toFixed(1)} · {selectedSeller.reviews} reseñas · Score {selectedSeller.score}</p>
+                        <button className="fb-btn-primary" onClick={() => { setSellerFilter(selectedSeller.id); go('marketplace') }}>Ver anuncios</button>
                       </div>
                     </div>
                     <div className="fb-stats">
@@ -442,13 +445,41 @@ export default function App() {
                     <div className="fb-grid">{products.filter((p) => p.seller_id === selectedSeller.id).map((p) => <ProductCard key={p.id} p={p} seller={selectedSeller} onOpen={() => setSelectedProduct(p)} onAdd={() => addToCart(p)} onSave={() => toggleSaved(p.id)} saved={!!saved[p.id]} />)}</div>
                   </div>
                 ) : (
-                  <div className="fb-list">{sellers.map((s) => (
-                    <article className="fb-row" key={s.id}>
-                      <span className="fb-avatar-lg sm">{s.emoji}</span>
-                      <button className="fb-row-main" onClick={() => setSelectedSeller(s)}><strong>{s.name} {s.verified && <span className="fb-verified">✓</span>}</strong><small>{s.category} · {s.location}</small><small>★ {s.rating.toFixed(1)} · {s.reviews} reseñas · {s.total} operaciones</small></button>
-                      <button className="fb-btn" onClick={() => { setSellerFilter(s.id); go('marketplace') }}>Ver anuncios</button>
-                    </article>
-                  ))}</div>
+                  <div>
+                    <div className="fb-chips">
+                      {['Todos', 'Verificados', 'Top ventas'].map((t) => (
+                        <button key={t} className={sellerTab === t ? 'fb-chip active' : 'fb-chip'} onClick={() => setSellerTab(t)}>{t}</button>
+                      ))}
+                    </div>
+                    <h3>Top vendedores</h3>
+                    <div className="play-chart">{[...sellers].sort((a, b) => b.completed - a.completed).slice(0, 3).map((s, i) => {
+                      const apps = products.filter((p) => p.seller_id === s.id)
+                      return (
+                        <article className="play-chart-row" key={s.id}>
+                          <span className="play-rank">{i + 1}</span>
+                          <button className="play-seller-icon" onClick={() => setSelectedSeller(s)} aria-label={`Ver ${s.name}`}>{s.emoji}</button>
+                          <button className="play-seller-main" onClick={() => setSelectedSeller(s)}><strong>{s.name} {s.verified && <span className="fb-verified">✓</span>}</strong><small>{s.category}</small><small>★ {s.rating.toFixed(1)} · {s.reviews} reseñas</small><small>{s.completed} ventas · {apps.length} anuncios</small></button>
+                          <button className="fb-btn" onClick={() => { setSellerFilter(s.id); go('marketplace') }}>Ver apps</button>
+                        </article>
+                      )
+                    })}</div>
+                    <h3>Todos los vendedores</h3>
+                    <div className="fb-grid">{sellers.filter((s) => {
+                      if (sellerTab === 'Verificados') return s.verified
+                      if (sellerTab === 'Top ventas') return [...sellers].sort((a, b) => b.completed - a.completed).slice(0, 3).some((t) => t.id === s.id)
+                      return true
+                    }).map((s) => {
+                      const apps = products.filter((p) => p.seller_id === s.id)
+                      const minPrice = apps.length ? Math.min(...apps.map((p) => p.price)) : 0
+                      return (
+                        <article className="play-seller-card" key={s.id}>
+                          <button className="play-seller-icon" onClick={() => setSelectedSeller(s)} aria-label={`Ver ${s.name}`}>{s.emoji}</button>
+                          <button className="play-seller-main" onClick={() => setSelectedSeller(s)}><strong>{s.name} {s.verified && <span className="fb-verified">✓</span>}</strong><small>{s.category} · {s.location}</small><small>★ {s.rating.toFixed(1)} · {s.reviews} reseñas</small><small>{apps.length} anuncios · Desde {priceLabel(minPrice)}</small></button>
+                          <button className="fb-btn" onClick={() => { setSellerFilter(s.id); go('marketplace') }}>Ver apps</button>
+                        </article>
+                      )
+                    })}</div>
+                  </div>
                 )}
               </section>
             </div>

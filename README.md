@@ -6,15 +6,15 @@ productos, eventos y lugares.**
 
 ## Visualidad
 
-Visualidad **inspirada en Facebook** (layout y patrones: fondo gris,
-tarjetas blancas, barra superior, sidebar, feed central, botones
-azules), con **marca propia «Store»** (🛍️).
+Visualidad **inspirada en Play Store** (layout y patrones: fondo blanco,
+tarjetas con borde, barra superior, barra de pestañas a todo lo ancho
+(sin sidebar), botones en píldora), con **marca propia «Store»** (🛍️).
 
-- Fondo #f0f2f5, tarjetas blancas radio 8px, acento azul #1877F2,
-  texto #050505 / secundario #65676b. Tipografía sans Inter / Roboto.
-- **No** es una app de Facebook: no usa logo «f», wordmark ni assets
-  de Facebook, y no afirma ser Facebook. En textos se dice «estilo
-  Facebook» como referencia.
+- Fondo blanco, tarjetas con borde radio 16px, acento verde #01875a,
+  texto #202124 / secundario #5f6368. Tipografía sans Roboto / Inter.
+- **No** es una app de Google Play: no usa logo, wordmark ni assets
+  de Google, y no afirma ser Google Play. En textos se dice «estilo
+  tienda de apps» como referencia.
 
 ## Secciones
 
@@ -26,7 +26,7 @@ azules), con **marca propia «Store»** (🛍️).
   condición (Nuevo/Usado), vendedor y Guardados. Anuncio con foto,
   precio, condición, vendedor. Detalle con Mensaje al vendedor
   (WhatsApp), Guardar, Obtener, Editar y Eliminar.
-- **Eventos (estilo Facebook Events):** filtros Próximos, Pasados,
+- **Eventos (con RSVP como en las apps de eventos):** filtros Próximos, Pasados,
   Mis eventos (RSVP), Que organizo, Todos + buscador. Tarjeta con
   portada, bloque de fecha (mes+día), organizador, fecha/hora, lugar,
   precio, «X van · Y interesados» (interesados = asistentes ×1.6),
@@ -36,8 +36,11 @@ azules), con **marca propia «Store»** (🛍️).
   con sus eventos y «Crear evento aquí». Crear, Editar y Eliminar.
   Al eliminar un lugar, sus eventos quedan con el lugar en texto
   (no se borran eventos).
-- **Vendedores:** perfiles con stats (ventas completadas, canceladas,
-  volumen, operaciones) y sus anuncios.
+- **Vendedores:** catálogo como en una tienda de apps — ranking
+  «Top vendedores», chips Todos / Verificados / Top ventas, fichas
+  de desarrollador con icono, categoría, estrellas, anuncios y precio
+  «Desde $X», botón «Ver apps». Perfil con stats (ventas completadas,
+  canceladas, volumen, operaciones) y sus anuncios.
 - **Mis publicaciones:** productos/eventos/lugares creados en este
   navegador. Demo: se puede editar/eliminar **cualquier**
   publicación (se indica en la UI).
@@ -80,9 +83,9 @@ azules), con **marca propia «Store»** (🛍️).
 
 - Sin amigos, notificaciones ni chat real (el «Mensaje al vendedor»
   abre WhatsApp con un texto prefijado).
-- Políticas de Supabase actuales: lectura pública (MVP). **Endurecer
-  antes de producción**: las escrituras con la anon key pueden ser
-  rechazadas por RLS, y no debe exponerse escritura pública en prod.
+- Políticas de Supabase actuales: lectura + escritura públicas,
+  permisivas (MVP). **Endurecer antes de producción**: no exponer
+  escritura pública en prod; usar autenticación y políticas por autor.
 
 ## Desarrollo / Build
 
@@ -97,7 +100,7 @@ Destino: Cloudflare Pages, proyecto `store`, repo `hojasdesign-bit/store`.
 
 ## PWA
 
-Manifest en `public/manifest.webmanifest` (theme #1877F2, fondo
-#f0f2f5), service worker en `public/sw.js` (solo producción),
+Manifest en `public/manifest.webmanifest` (theme #01875a, fondo
+#ffffff), service worker en `public/sw.js` (solo producción),
 iconos en `public/icons/`. La app es instalable desde el menú del
 navegador.
